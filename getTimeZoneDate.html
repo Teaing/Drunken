@@ -1,0 +1,76 @@
+<html>
+<title>
+    GetTime for TimeZone
+</title>
+<script>
+    function TimeMe() {
+        this.myDate = new Date();
+
+        /*  获取当前地区时间  */
+        TimeMe.prototype.getNow = function () {
+            return this.myDate.toString();
+        }
+
+        /* 获取当前格式化后时间 */
+        TimeMe.prototype.getNowConvert = function () {
+            return convertTime(this.myDate);
+        }
+
+        /*  获取当前时间戳  */
+        TimeMe.prototype.getTimestamp = function () {
+            return this.myDate.getTime();
+        }
+
+        /*  获取UTC时间  */
+        TimeMe.prototype.getUTCDate = function () {
+            return this.myDate.toUTCString();
+        }
+
+        /*  获取指定时区的对应时间,基于0时区时间  */
+        TimeMe.prototype.getTimeZoneTime = function (timeZone) {
+            //var myDate = new Date(); //  时间初始化,避免后面还得再还原时间
+            timeZone = parseInt(timeZone);  //  转换类型
+            timeZone = timeZone >= -12 && timeZone <= 12 ? timeZone : 0; //  只允许 -12 时区 到 +12 时区范围
+            nowTimeZone = parseInt((this.myDate.getTimezoneOffset() / 60))  //  获取当前系统时区
+            this.myDate.setHours(this.myDate.getHours() + nowTimeZone + timeZone);  //  在0时区基础上计算时间
+            var convertTimeStr = convertTime(this.myDate);
+            this.myDate.setHours(this.myDate.getHours() - nowTimeZone - timeZone);  //  时间复原，或者每次初始化也成
+            return convertTimeStr;
+        }
+
+        TimeMe.prototype.geTimeZoneTimeTwo = function (timeZone) {
+            if (typeof timeZone !== 'number') return;   //参数timeZone为时区值数字，比如北京为东八区则输进+8,西5输入-5
+            var myDate = new Date();
+            var len = myDate.getTime(); //获取时间戳
+            var offset = myDate.getTimezoneOffset() * 60000;    //本地时间与GMT时间的时间偏移差
+            var utcTime = len + offset; //得到现在的格林尼治时间
+            return new Date(utcTime + 3600000 * timeZone);  //换算时区,GMT时区不会改变
+        }
+
+        /*  格式化时间显示  */
+        var convertTime = function (dateTime) {
+            var nowTime = new Date(dateTime);
+            Y = nowTime.getFullYear();  // 获取完整的年份(4位,1970)
+            M = addZero(nowTime.getMonth());  // 获取月份(0-11,0代表1月,用的时候记得加上1)
+            D = addZero(nowTime.getDate());  // 获取日(1-31)
+            h = addZero(nowTime.getHours());  // 获取小时数(0-23)
+            m = addZero(nowTime.getMinutes());  // 获取分钟数(0-59)
+            s = addZero(nowTime.getSeconds());  // 获取秒数(0-59)
+            return Y + '-' + M + '-' + D + ' ' + h + ':' + m + ':' + s;
+        }
+
+        /*  时间前加0  */
+        var addZero = function (timeStr) {
+            var timeValue = timeStr.toString();
+            return timeValue.length == 1 ? '0' + timeValue : timeValue;
+        }
+    }
+    var timestr = new TimeMe();
+    console.log(timestr.getNowConvert());
+    console.log(timestr.getTimeZoneTime('+10'));
+    console.log(timestr.getTimeZoneTime('-10'));
+    console.log(timestr.geTimeZoneTimeTwo(+10));
+    console.log(timestr.geTimeZoneTimeTwo(-10));
+</script>
+
+</html>
